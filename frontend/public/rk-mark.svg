@@ -1,0 +1,12 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fav-bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="100%" stop-color="#1E0A3C"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#fav-bg)"/>
+  <text x="16" y="16" text-anchor="middle" dominant-baseline="central"
+    font-family="Georgia, serif" font-size="12.5" font-weight="bold"
+    fill="#FDE68A" letter-spacing="0.5">RKS</text>
+</svg>

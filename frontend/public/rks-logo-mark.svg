@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="100%" stop-color="#1E0A3C"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="58%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="50" fill="url(#bg)"/>
+
+  <!-- Outer decorative rings -->
+  <circle cx="50" cy="50" r="47.5" fill="none" stroke="url(#gold)" stroke-width="1.1" opacity="0.65"/>
+  <circle cx="50" cy="50" r="43" fill="none" stroke="url(#gold)" stroke-width="0.45" opacity="0.3"/>
+
+  <!-- 8 outer lotus petals (0, 45, 90, 135 ... 315 degrees) -->
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(0 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(45 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(90 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(135 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(180 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(225 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(270 50 50)"/>
+  <ellipse cx="50" cy="27" rx="4.2" ry="10.5" fill="url(#gold)" opacity="0.28" transform="rotate(315 50 50)"/>
+
+  <!-- 8 inner lotus petals (offset 22.5 deg, slightly closer & brighter) -->
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(22.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(67.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(112.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(157.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(202.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(247.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(292.5 50 50)"/>
+  <ellipse cx="50" cy="31.5" rx="3" ry="7.5" fill="url(#gold)" opacity="0.52" transform="rotate(337.5 50 50)"/>
+
+  <!-- Centre disc (dark background for text) -->
+  <circle cx="50" cy="50" r="20.5" fill="url(#bg)"/>
+  <circle cx="50" cy="50" r="20.5" fill="none" stroke="url(#gold)" stroke-width="0.9" opacity="0.7"/>
+
+  <!-- RKS logotype -->
+  <text
+    x="50" y="50"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="13.5"
+    font-weight="bold"
+    fill="white"
+    letter-spacing="2">RKS</text>
+</svg>

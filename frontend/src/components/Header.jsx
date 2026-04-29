@@ -1,4 +1,12 @@
-import { useState } from "react";
+function AdminIcon() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <path d="M8 9h8M8 13h6M8 17h4"/>
+    </svg>
+  );
+}
+import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
@@ -56,6 +64,14 @@ export default function Header() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => !!localStorage.getItem("rks_admin_token"));
+
+  // Listen for admin login/logout in other tabs
+  React.useEffect(() => {
+    const handler = () => setIsAdmin(!!localStorage.getItem("rks_admin_token"));
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
 
   const submitSearch = (e) => {
     e.preventDefault();
@@ -96,6 +112,18 @@ export default function Header() {
         </form>
 
         <div className="header-actions">
+          {isAdmin && (
+            <button
+              type="button"
+              className="icon-button admin-header-btn"
+              aria-label="Admin Panel"
+              title="Admin Panel"
+              onClick={() => navigate("/admin")}
+              style={{ background: "#f3f4f6", borderRadius: 8, marginRight: 6 }}
+            >
+              <AdminIcon />
+            </button>
+          )}
           {!isLoggedIn ? (
             <button type="button" className="header-login-btn" onClick={openLoginModal}>Login</button>
           ) : (

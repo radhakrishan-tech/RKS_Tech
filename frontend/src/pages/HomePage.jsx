@@ -89,7 +89,7 @@ export default function HomePage() {
       category: filters.category,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
-    })
+    }, { suppressLoader: true })
       .then((data) => {
         if (!active) return;
         setProducts(data.products || []);
@@ -154,8 +154,16 @@ export default function HomePage() {
   );
 
   const recentlyViewed = useMemo(() => {
+    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
     try {
-      return JSON.parse(localStorage.getItem("rks_recent") || "[]");
+      const items = JSON.parse(localStorage.getItem("rks_recent") || "[]");
+      const now = Date.now();
+      const filtered = items.filter(item => item.viewedAt && (now - item.viewedAt < FIVE_DAYS));
+      // Update localStorage to auto-remove expired
+      if (filtered.length !== items.length) {
+        localStorage.setItem("rks_recent", JSON.stringify(filtered));
+      }
+      return filtered;
     } catch {
       return [];
     }

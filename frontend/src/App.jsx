@@ -1,5 +1,8 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { GlobalUIProvider, useGlobalUI } from "./context/GlobalUIContext";
+import GlobalLoader from "./components/GlobalLoader";
+import GlobalToast from "./components/GlobalToast";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import SaleBanner from "./components/SaleBanner";
 import StickyCartButton from "./components/StickyCartButton";
@@ -18,7 +21,8 @@ const TermsPage = lazy(() => import("./pages/TermsPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const OrderTrackingPage = lazy(() => import("./pages/OrderTrackingPage"));
 
-function App() {
+function AppShell() {
+  const location = useLocation();
   const [now, setNow] = useState(() => new Date());
   const [showSplash, setShowSplash] = useState(false);
 
@@ -44,6 +48,11 @@ function App() {
     document.documentElement.setAttribute("data-time", profile.timeOfDay);
   }, [profile.season, profile.timeOfDay]);
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   const finishSplash = () => {
     localStorage.setItem("rks_intro_seen_session", "1");
     setShowSplash(false);
@@ -53,10 +62,14 @@ function App() {
     return <IntroSplash onDone={finishSplash} />;
   }
 
+  const { loading, toast, showToast } = useGlobalUI();
+
   return (
     <div className={`app-shell season-${profile.season} time-${profile.timeOfDay}`}>
       <Header />
       <SaleBanner />
+      {/* <GlobalLoader visible={loading} /> */}
+      <GlobalToast toast={toast} onClose={() => showToast(null)} />
       <Suspense fallback={<main className="container">Loading...</main>}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -77,4 +90,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <GlobalUIProvider>
+      <AppShell />
+    </GlobalUIProvider>
+  );
+}

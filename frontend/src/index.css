@@ -1,3 +1,44 @@
+/* === GLOBAL LOADER & TOAST === */
+.global-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255,255,255,0.65);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+.global-loader-spinner {
+  width: 54px;
+  height: 54px;
+  border: 6px solid #e0e7ef;
+  border-top: 6px solid #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.global-toast {
+  background: #fff;
+  color: #222;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  opacity: 0.98;
+}
+.global-toast--success { border-left: 6px solid #22c55e; }
+.global-toast--error { border-left: 6px solid #ef4444; }
+.global-toast--info { border-left: 6px solid #6366f1; }
 .category-icons-row.premium-scroll {
   display: flex;
   gap: 1.1rem;
@@ -133,6 +174,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 {
@@ -164,6 +206,8 @@ img {
   width: min(1320px, 94vw);
   margin: 0 auto;
   padding: 1.5rem 0 3rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* === 4. HEADER === */
@@ -2032,6 +2076,26 @@ button:disabled {
 
 /* Tablet / mobile collapse - 900px */
 @media (max-width: 900px) {
+    .admin-table {
+      min-width: 420px;
+      font-size: 0.92rem;
+      max-width: 100vw;
+    }
+    .admin-card, .admin-table-wrap {
+      padding: 0.7rem 0.3rem;
+      margin-left: 0;
+      margin-right: 0;
+      max-width: 100vw;
+      overflow-x: auto;
+    }
+    .summary-cards {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+    }
+    .admin-grid {
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+    }
   .site-header {
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -2132,7 +2196,30 @@ button:disabled {
 /* Mobile */
 @media (max-width: 480px) {
   .container {
-    padding: 1rem 0 2rem;
+    padding: 0.5rem 0 1.5rem;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .admin-table {
+    font-size: 0.82rem;
+    min-width: 320px;
+    max-width: 100vw;
+    overflow-x: auto;
+  }
+  .admin-card, .admin-table-wrap {
+    padding: 0.5rem 0.1rem;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100vw;
+    overflow-x: auto;
+  }
+  .summary-cards {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .admin-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 
   .grid {
@@ -2697,6 +2784,8 @@ body {
   border-radius: var(--r-md);
   box-shadow: var(--shadow-xs);
   padding: 1rem;
+  max-width: 100vw;
+  overflow-x: auto;
 }
 
 .admin-card h3 {
@@ -2736,12 +2825,17 @@ body {
 
 .admin-table-wrap {
   overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.86rem;
+  min-width: 520px;
+  max-width: 100vw;
+  table-layout: auto;
 }
 
 .admin-table th,

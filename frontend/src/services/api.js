@@ -1,15 +1,43 @@
 import axios from "axios";
 
-// const api = axios.create({
-//   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-// });
-
 const api = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || "http://localhost:5000") + "/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
-export async function fetchProducts(params = {}) {
+// Loader and toast event helpers
+function emitLoader(show) {
+  window.dispatchEvent(new CustomEvent("global-loader", { detail: show }));
+}
+function emitToast(type, message) {
+  window.dispatchEvent(new CustomEvent("global-toast", { detail: { type, message } }));
+}
+
+let activeRequests = 0;
+api.interceptors.request.use((config) => {
+  activeRequests++;
+  emitLoader(true);
+  return config;
+});
+api.interceptors.response.use(
+  (response) => {
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) emitLoader(false);
+    return response;
+  },
+  (error) => {
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) emitLoader(false);
+    // Show error toast if available
+    const msg = error?.response?.data?.message || error.message || "Request failed";
+    emitToast("error", msg);
+    return Promise.reject(error);
+  }
+);
+
+export async function fetchProducts(params = {}, { suppressLoader = false } = {}) {
+  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   const { data } = await api.get("/products", { params });
+  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   return data;
 }
 
@@ -18,8 +46,10 @@ export async function fetchCategories() {
   return data.categories;
 }
 
-export async function fetchProductBySlug(slug) {
+export async function fetchProductBySlug(slug, { suppressLoader = false } = {}) {
+  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   const { data } = await api.get(`/products/${slug}`);
+  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   return data;
 }
 

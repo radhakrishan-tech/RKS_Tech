@@ -11,12 +11,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+  /* Product Page Responsive Layout Fix */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 8px;
 
 @keyframes logo-spin {
   from {
@@ -24,9 +23,10 @@
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 8px;
+    width: 100%;
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;

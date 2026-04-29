@@ -29,6 +29,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@babel/code-frame": "^7.29.0",
     "nodemon": "^3.1.14"
   }
 }

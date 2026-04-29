@@ -10,7 +10,12 @@ import { GiTrousers } from "react-icons/gi";
 import { TbBath } from "react-icons/tb";
 import { MdFace } from "react-icons/md";
 import CategoryCard from "../components/CategoryCard";
-import { fetchCategories, fetchProducts } from "../services/api";
+// import { fetchCategories, fetchProducts } from "../services/api";
+import {
+  fetchCategories,
+  fetchProducts,
+  fetchCategorySales30d,
+} from "../services/api";
 import { useRef } from "react";
 
 const initialFilters = {
@@ -45,14 +50,21 @@ const categoryRowVariants = {
 
 const categoryItemVariants = {
   hidden: { opacity: 0, y: 12, scale: 0.96 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.25, ease: "easeOut" } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
 };
 
 function getDiscountPercent(product) {
   if (!product.compareAtPrice || product.compareAtPrice <= product.price) {
     return 0;
   }
-  return Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100);
+  return Math.round(
+    ((product.compareAtPrice - product.price) / product.compareAtPrice) * 100
+  );
 }
 
 export default function HomePage() {
@@ -68,9 +80,8 @@ export default function HomePage() {
     fetchCategories().then(setCategories).catch(console.error);
     if (!fetchedSales.current) {
       fetchedSales.current = true;
-      fetch("/api/products/categories/sales30d")
-        .then((res) => res.json())
-        .then((data) => setCategorySales30d(Array.isArray(data.sales) ? data.sales : []))
+      fetchCategorySales30d()
+        .then(setCategorySales30d)
         .catch(() => setCategorySales30d([]));
     }
   }, []);
@@ -123,12 +134,20 @@ export default function HomePage() {
 
     if (filters.size.trim()) {
       const needle = filters.size.trim().toLowerCase();
-      next = next.filter((product) => (product.tags || []).some((tag) => String(tag).toLowerCase().includes(needle)));
+      next = next.filter((product) =>
+        (product.tags || []).some((tag) =>
+          String(tag).toLowerCase().includes(needle)
+        )
+      );
     }
 
     if (filters.color.trim()) {
       const needle = filters.color.trim().toLowerCase();
-      next = next.filter((product) => (product.tags || []).some((tag) => String(tag).toLowerCase().includes(needle)));
+      next = next.filter((product) =>
+        (product.tags || []).some((tag) =>
+          String(tag).toLowerCase().includes(needle)
+        )
+      );
     }
 
     if (filters.sortBy === "price-asc") {
@@ -136,11 +155,21 @@ export default function HomePage() {
     } else if (filters.sortBy === "price-desc") {
       next.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
     } else {
-      next.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      next.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
 
     return next;
-  }, [products, filters.discount, filters.availability, filters.size, filters.color, filters.sortBy]);
+  }, [
+    products,
+    filters.discount,
+    filters.availability,
+    filters.size,
+    filters.color,
+    filters.sortBy,
+  ]);
 
   const offerProducts = useMemo(
     () =>
@@ -174,10 +203,17 @@ export default function HomePage() {
     const categoryOptions = CATEGORY_ICONS.filter((item) => item.value !== "");
 
     // Prefer 30d sales if available
-    if (categorySales30d && Array.isArray(categorySales30d) && categorySales30d.length > 0) {
-      const salesMap = new Map(categorySales30d.map((c) => [c.category, c.sold]));
+    if (
+      categorySales30d &&
+      Array.isArray(categorySales30d) &&
+      categorySales30d.length > 0
+    ) {
+      const salesMap = new Map(
+        categorySales30d.map((c) => [c.category, c.sold])
+      );
       const ranked = [...categoryOptions].sort((a, b) => {
-        const soldDiff = (salesMap.get(b.value) || 0) - (salesMap.get(a.value) || 0);
+        const soldDiff =
+          (salesMap.get(b.value) || 0) - (salesMap.get(a.value) || 0);
         if (soldDiff !== 0) return soldDiff;
         return a.order - b.order;
       });
@@ -185,14 +221,20 @@ export default function HomePage() {
     }
 
     // Fallback: use lifetime soldCount
-    const soldByCategory = new Map(categoryOptions.map((item) => [item.value, 0]));
+    const soldByCategory = new Map(
+      categoryOptions.map((item) => [item.value, 0])
+    );
     for (const product of products) {
       if (!soldByCategory.has(product.category)) continue;
       const current = soldByCategory.get(product.category) || 0;
-      soldByCategory.set(product.category, current + Number(product.soldCount || 0));
+      soldByCategory.set(
+        product.category,
+        current + Number(product.soldCount || 0)
+      );
     }
     const ranked = [...categoryOptions].sort((a, b) => {
-      const soldDiff = (soldByCategory.get(b.value) || 0) - (soldByCategory.get(a.value) || 0);
+      const soldDiff =
+        (soldByCategory.get(b.value) || 0) - (soldByCategory.get(a.value) || 0);
       if (soldDiff !== 0) return soldDiff;
       return a.order - b.order;
     });
@@ -225,14 +267,18 @@ export default function HomePage() {
         >
           {orderedCategoryIcons.map((item) => {
             const isAll = item.value === "";
-            const isActive = isAll ? !filters.category : filters.category === item.value;
+            const isActive = isAll
+              ? !filters.category
+              : filters.category === item.value;
             return (
               <CategoryCard
                 key={item.name}
                 icon={item.icon}
                 label={item.name}
                 active={isActive}
-                onClick={() => setFilters((prev) => ({ ...prev, category: item.value }))}
+                onClick={() =>
+                  setFilters((prev) => ({ ...prev, category: item.value }))
+                }
               />
             );
           })}
@@ -243,44 +289,98 @@ export default function HomePage() {
             className="catalog-search"
             placeholder="Search products"
             value={filters.search}
-            onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, search: e.target.value }))
+            }
           />
 
-          <select value={filters.category} onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}>
+          <select
+            value={filters.category}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, category: e.target.value }))
+            }
+          >
             <option value="">All categories</option>
             {categories.map((category) => (
-              <option value={category.name} key={category.name}>{category.name}</option>
+              <option value={category.name} key={category.name}>
+                {category.name}
+              </option>
             ))}
           </select>
 
-          <input type="number" placeholder="Min price" value={filters.minPrice} onChange={(e) => setFilters((prev) => ({ ...prev, minPrice: e.target.value }))} />
-          <input type="number" placeholder="Max price" value={filters.maxPrice} onChange={(e) => setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))} />
+          <input
+            type="number"
+            placeholder="Min price"
+            value={filters.minPrice}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, minPrice: e.target.value }))
+            }
+          />
+          <input
+            type="number"
+            placeholder="Max price"
+            value={filters.maxPrice}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))
+            }
+          />
 
-          <select value={filters.discount} onChange={(e) => setFilters((prev) => ({ ...prev, discount: e.target.value }))}>
+          <select
+            value={filters.discount}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, discount: e.target.value }))
+            }
+          >
             <option value="">Discount</option>
             <option value="10">10% and above</option>
             <option value="25">25% and above</option>
           </select>
 
-          <select value={filters.availability} onChange={(e) => setFilters((prev) => ({ ...prev, availability: e.target.value }))}>
+          <select
+            value={filters.availability}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, availability: e.target.value }))
+            }
+          >
             <option value="">Availability</option>
             <option value="in">In Stock</option>
             <option value="out">Out of Stock</option>
           </select>
 
-          <input placeholder="Size" value={filters.size} onChange={(e) => setFilters((prev) => ({ ...prev, size: e.target.value }))} />
-          <input placeholder="Color" value={filters.color} onChange={(e) => setFilters((prev) => ({ ...prev, color: e.target.value }))} />
+          <input
+            placeholder="Size"
+            value={filters.size}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, size: e.target.value }))
+            }
+          />
+          <input
+            placeholder="Color"
+            value={filters.color}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, color: e.target.value }))
+            }
+          />
 
-          <select value={filters.sortBy} onChange={(e) => setFilters((prev) => ({ ...prev, sortBy: e.target.value }))}>
+          <select
+            value={filters.sortBy}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, sortBy: e.target.value }))
+            }
+          >
             <option value="newest">Newest</option>
             <option value="price-asc">Price Low to High</option>
             <option value="price-desc">Price High to Low</option>
           </select>
 
-          <button type="button" className="ghost-button" onClick={clearFilters}>Reset</button>
+          <button type="button" className="ghost-button" onClick={clearFilters}>
+            Reset
+          </button>
         </div>
 
-        {isLoadingProducts ? <div className="catalog-empty">Loading products...</div> : null}
+        {isLoadingProducts ? (
+          <div className="catalog-empty">Loading products...</div>
+        ) : null}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -291,13 +391,18 @@ export default function HomePage() {
             transition={{ duration: 0.2 }}
             className="grid"
           >
-            {!isLoadingProducts && processedProducts.map((product) => (
-              <ProductCard product={product} key={product._id} />
-            ))}
+            {!isLoadingProducts &&
+              processedProducts.map((product) => (
+                <ProductCard product={product} key={product._id} />
+              ))}
           </motion.div>
         </AnimatePresence>
 
-        {!isLoadingProducts && processedProducts.length === 0 ? <div className="catalog-empty">No products found for selected filters.</div> : null}
+        {!isLoadingProducts && processedProducts.length === 0 ? (
+          <div className="catalog-empty">
+            No products found for selected filters.
+          </div>
+        ) : null}
       </section>
 
       <section className="offer-products-section">
@@ -313,7 +418,10 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="offer-empty-state">
-            <p>No live offers right now. Add discounted products to see them highlighted here.</p>
+            <p>
+              No live offers right now. Add discounted products to see them
+              highlighted here.
+            </p>
           </div>
         )}
       </section>
@@ -324,7 +432,9 @@ export default function HomePage() {
           {recentlyViewed.length === 0 ? (
             <p>No recently viewed items yet.</p>
           ) : (
-            recentlyViewed.slice(0, 6).map((item) => <span key={item.slug}>{item.name}</span>)
+            recentlyViewed
+              .slice(0, 6)
+              .map((item) => <span key={item.slug}>{item.name}</span>)
           )}
         </div>
       </section>

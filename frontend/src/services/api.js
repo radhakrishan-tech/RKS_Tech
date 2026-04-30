@@ -46,6 +46,11 @@ export async function fetchCategories() {
   return data.categories;
 }
 
+export async function fetchCategorySales30d() {
+  const { data } = await api.get("/products/categories/sales30d");
+  return data.sales || [];
+}
+
 export async function fetchProductBySlug(slug, { suppressLoader = false } = {}) {
   if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   const { data } = await api.get(`/products/${slug}`);

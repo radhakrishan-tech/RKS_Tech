@@ -9,7 +9,9 @@ function emitLoader(show) {
   window.dispatchEvent(new CustomEvent("global-loader", { detail: show }));
 }
 function emitToast(type, message) {
-  window.dispatchEvent(new CustomEvent("global-toast", { detail: { type, message } }));
+  window.dispatchEvent(
+    new CustomEvent("global-toast", { detail: { type, message } })
+  );
 }
 
 let activeRequests = 0;
@@ -28,16 +30,22 @@ api.interceptors.response.use(
     activeRequests = Math.max(0, activeRequests - 1);
     if (activeRequests === 0) emitLoader(false);
     // Show error toast if available
-    const msg = error?.response?.data?.message || error.message || "Request failed";
+    const msg =
+      error?.response?.data?.message || error.message || "Request failed";
     emitToast("error", msg);
     return Promise.reject(error);
   }
 );
 
-export async function fetchProducts(params = {}, { suppressLoader = false } = {}) {
-  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
+export async function fetchProducts(
+  params = {},
+  { suppressLoader = false } = {}
+) {
+  if (suppressLoader)
+    window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   const { data } = await api.get("/products", { params });
-  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
+  if (suppressLoader)
+    window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   return data;
 }
 
@@ -51,10 +59,15 @@ export async function fetchCategorySales30d() {
   return data.sales || [];
 }
 
-export async function fetchProductBySlug(slug, { suppressLoader = false } = {}) {
-  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
+export async function fetchProductBySlug(
+  slug,
+  { suppressLoader = false } = {}
+) {
+  if (suppressLoader)
+    window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   const { data } = await api.get(`/products/${slug}`);
-  if (suppressLoader) window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
+  if (suppressLoader)
+    window.dispatchEvent(new CustomEvent("global-loader", { detail: false }));
   return data;
 }
 
@@ -112,9 +125,13 @@ export async function addMyAddress(token, payload) {
 }
 
 export async function updateMyAddress(token, addressId, payload) {
-  const { data } = await api.put(`/account/me/addresses/${addressId}`, payload, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const { data } = await api.put(
+    `/account/me/addresses/${addressId}`,
+    payload,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   return data;
 }
 
@@ -174,7 +191,6 @@ export async function uploadAdminImages(token, files = []) {
   const { data } = await api.post("/admin/uploads/images", formData, {
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
     },
   });
 

@@ -237,11 +237,22 @@ export default function AdminPage() {
     return {
       name: sourceForm.name.trim(),
       slug: sourceForm.slug.trim() || toSlug(sourceForm.name),
-      category: sourceForm.category,
+
+      category: [
+        "Kurti",
+        "Dupatta",
+        "Plazo",
+        "Bath Towel",
+        "Face Towel",
+      ].includes(sourceForm.category)
+        ? sourceForm.category
+        : "Kurti",
+
       comboItems:
         sourceForm.category === "Combo"
           ? sourceForm.comboItems.trim()
           : undefined,
+
       price: Number(sourceForm.price) || 0,
       discountPrice:
         sourceForm.discountPrice === ""
@@ -261,15 +272,21 @@ export default function AdminPage() {
       images: [...urlImages, ...extraImages],
 
       sizes: sourceForm.sizes
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      colors: sourceForm.colors,
+        ? sourceForm.sizes
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
+
+      colors: Array.isArray(sourceForm.colors)
+        ? sourceForm.colors.filter((c) => c.name?.trim() && c.hex)
+        : [],
 
       active: Boolean(sourceForm.active),
       isSummerFriendly: Boolean(sourceForm.isSummerFriendly),
     };
   };
+
   const handleCreateProduct = async (e) => {
     e.preventDefault();
     setComboError("");

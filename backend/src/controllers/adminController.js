@@ -32,7 +32,9 @@ const productSchema = z.object({
 const createProduct = asyncHandler(async (req, res) => {
   const parsed = productSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid request", errors: parsed.error.issues });
+    return res
+      .status(400)
+      .json({ message: "Invalid request", errors: parsed.error.issues });
   }
 
   const product = await Product.create(parsed.data);
@@ -45,13 +47,20 @@ const uploadImages = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "No images uploaded" });
   }
 
-  const host = `${req.protocol}://${req.get("host")}`;
+  const host = `https://${req.get("host")}`;
   const images = files.map((file) => `${host}/uploads/${file.filename}`);
   return res.status(201).json({ images });
 });
 
 const updateOrderStatusSchema = z.object({
-  status: z.enum(["Pending", "Confirmed", "Packed", "Shipped", "Delivered", "Cancelled"]),
+  status: z.enum([
+    "Pending",
+    "Confirmed",
+    "Packed",
+    "Shipped",
+    "Delivered",
+    "Cancelled",
+  ]),
 });
 
 function toPositiveInt(value, fallback) {
@@ -82,17 +91,23 @@ function buildCSV(rows) {
   }
   const headers = Object.keys(rows[0]);
   const head = headers.map(csvEscape).join(",");
-  const body = rows.map((row) => headers.map((header) => csvEscape(row[header])).join(",")).join("\n");
+  const body = rows
+    .map((row) => headers.map((header) => csvEscape(row[header])).join(","))
+    .join("\n");
   return `${head}\n${body}`;
 }
 
 const updateProduct = asyncHandler(async (req, res) => {
   const parsed = productSchema.partial().safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid request", errors: parsed.error.issues });
+    return res
+      .status(400)
+      .json({ message: "Invalid request", errors: parsed.error.issues });
   }
 
-  const product = await Product.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
+  const product = await Product.findByIdAndUpdate(req.params.id, parsed.data, {
+    new: true,
+  });
   if (!product) {
     return res.status(404).json({ message: "Product not found" });
   }
@@ -101,7 +116,11 @@ const updateProduct = asyncHandler(async (req, res) => {
 });
 
 const deleteProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, { active: false }, { new: true });
+  const product = await Product.findByIdAndUpdate(
+    req.params.id,
+    { active: false },
+    { new: true }
+  );
   if (!product) {
     return res.status(404).json({ message: "Product not found" });
   }
@@ -191,13 +210,16 @@ const listOrders = asyncHandler(async (req, res) => {
 });
 
 const summary = asyncHandler(async (req, res) => {
-  const [orderCount, salesAgg, pendingCount, deliveredCount, activeProducts] = await Promise.all([
-    Order.countDocuments(),
-    Order.aggregate([{ $group: { _id: null, revenue: { $sum: "$pricing.total" } } }]),
-    Order.countDocuments({ status: "Pending" }),
-    Order.countDocuments({ status: "Delivered" }),
-    Product.countDocuments({ active: true }),
-  ]);
+  const [orderCount, salesAgg, pendingCount, deliveredCount, activeProducts] =
+    await Promise.all([
+      Order.countDocuments(),
+      Order.aggregate([
+        { $group: { _id: null, revenue: { $sum: "$pricing.total" } } },
+      ]),
+      Order.countDocuments({ status: "Pending" }),
+      Order.countDocuments({ status: "Delivered" }),
+      Product.countDocuments({ active: true }),
+    ]);
 
   return res.json({
     totalOrders: orderCount,
@@ -209,50 +231,55 @@ const summary = asyncHandler(async (req, res) => {
 });
 
 const analytics = asyncHandler(async (_req, res) => {
-  const dailyWindowStart = startOfDay(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000));
+  const dailyWindowStart = startOfDay(
+    new Date(Date.now() - 13 * 24 * 60 * 60 * 1000)
+  );
   const monthWindowStart = new Date();
   monthWindowStart.setMonth(monthWindowStart.getMonth() - 5);
   monthWindowStart.setDate(1);
   monthWindowStart.setHours(0, 0, 0, 0);
 
-  const [dailySalesRaw, monthlySalesRaw, statusBreakdownRaw] = await Promise.all([
-    Order.aggregate([
-      { $match: { createdAt: { $gte: dailyWindowStart } } },
-      {
-        $group: {
-          _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" },
-            day: { $dayOfMonth: "$createdAt" },
+  const [dailySalesRaw, monthlySalesRaw, statusBreakdownRaw] =
+    await Promise.all([
+      Order.aggregate([
+        { $match: { createdAt: { $gte: dailyWindowStart } } },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+              day: { $dayOfMonth: "$createdAt" },
+            },
+            revenue: { $sum: "$pricing.total" },
+            orders: { $sum: 1 },
           },
-          revenue: { $sum: "$pricing.total" },
-          orders: { $sum: 1 },
         },
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
-    ]),
-    Order.aggregate([
-      { $match: { createdAt: { $gte: monthWindowStart } } },
-      {
-        $group: {
-          _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" },
+        { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+      ]),
+      Order.aggregate([
+        { $match: { createdAt: { $gte: monthWindowStart } } },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+            },
+            revenue: { $sum: "$pricing.total" },
+            orders: { $sum: 1 },
           },
-          revenue: { $sum: "$pricing.total" },
-          orders: { $sum: 1 },
         },
-      },
-      { $sort: { "_id.year": 1, "_id.month": 1 } },
-    ]),
-    Order.aggregate([
-      { $group: { _id: "$status", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-    ]),
-  ]);
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ]),
+      Order.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+    ]);
 
   const dailySales = dailySalesRaw.map((item) => ({
-    date: `${item._id.year}-${String(item._id.month).padStart(2, "0")}-${String(item._id.day).padStart(2, "0")}`,
+    date: `${item._id.year}-${String(item._id.month).padStart(2, "0")}-${String(
+      item._id.day
+    ).padStart(2, "0")}`,
     revenue: item.revenue,
     orders: item.orders,
   }));
@@ -274,7 +301,9 @@ const analytics = asyncHandler(async (_req, res) => {
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const parsed = updateOrderStatusSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ message: "Invalid request", errors: parsed.error.issues });
+    return res
+      .status(400)
+      .json({ message: "Invalid request", errors: parsed.error.issues });
   }
 
   const order = await Order.findByIdAndUpdate(
@@ -349,7 +378,10 @@ const downloadReport = asyncHandler(async (req, res) => {
   if (format === "csv") {
     const csv = buildCSV(rows);
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", `attachment; filename=\"${filename}\"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=\"${filename}\"`
+    );
     return res.send(csv);
   }
 
@@ -358,7 +390,10 @@ const downloadReport = asyncHandler(async (req, res) => {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
 
-  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
   res.setHeader("Content-Disposition", `attachment; filename=\"${filename}\"`);
   return res.send(buffer);
 });
